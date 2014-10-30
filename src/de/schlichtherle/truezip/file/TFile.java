@@ -1791,8 +1791,9 @@ public final class TFile extends File {
 
     /**
      * {@hide}
+     * DO NOT CALL ON FILES DIFFERENT FROM THE FILESYSTEM ROOT
      */
-    public void open() throws IOException {
+    public void mount() throws IOException {
         if (null != innerArchive) {
             try {
                 innerArchive.getController().mknod(

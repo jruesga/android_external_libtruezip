@@ -28,10 +28,12 @@ extends SafeKeyProvider<K> {
     /** The resource identifier for the protected resource. */
     private volatile URI resource;
 
+    private boolean askAlwaysForWriteKey;
     private volatile boolean changeRequested;
 
     PromptingKeyProvider(PromptingKeyManager<K> manager) {
         this.view = manager.getView();
+        this.askAlwaysForWriteKey = false;
     }
 
     private View<K> getView() {
@@ -45,6 +47,13 @@ extends SafeKeyProvider<K> {
     private void setState(final State state) {
         assert null != state;
         this.state = state;
+    }
+
+    /**
+     * {@hide}
+     */
+    public void setAskAlwaysForWriteKey(boolean askAlwaysForWriteKey) {
+        this.askAlwaysForWriteKey = askAlwaysForWriteKey;
     }
 
     /**
@@ -194,9 +203,7 @@ extends SafeKeyProvider<K> {
                 if (provider.isChangeRequested()) {
                     provider.setChangeRequested(false);
                     RESET.retrieveWriteKey(provider); // DON'T change state!
-                } else {
-                    // FIXME -- CMFM -- Always ask for password. Caching is the view side.
-                    // This allow to reset the password (a bad way)
+                } else if (provider.askAlwaysForWriteKey) {
                     PromptingKeyProvider<K>.BaseController controller
                             = provider.new WriteController(this);
                     try {
